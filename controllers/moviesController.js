@@ -17,6 +17,7 @@ function index(req, res, next) {
         ...r,
         created_at: formattedDate.toLocaleString(),
         updated_at: formattedupdate.toLocaleString(),
+        image: `${process.env.SERVER_URL}/images/${r.image}`,
       };
     });
     return res.json(movies);
