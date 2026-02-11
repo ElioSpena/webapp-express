@@ -1,5 +1,6 @@
 import connection from "../database/connectionDb.js";
-import { DateTime } from "luxon";
+
+import { formatDate, createImagePath } from "../functions/utility.js";
 
 //INDEX
 
@@ -9,15 +10,11 @@ function index(req, res, next) {
     if (err) return next(err);
 
     const movies = results.map((r) => {
-      const date = r.created_at;
-      const update = r.updateDate_at;
-      const formattedDate = DateTime.fromObject(date);
-      const formattedupdate = DateTime.fromObject(update);
       return {
         ...r,
-        created_at: formattedDate.toLocaleString(),
-        updated_at: formattedupdate.toLocaleString(),
-        image: `${process.env.SERVER_URL}/images/${r.image}`,
+        created_at: formatDate(r.created_at),
+        updated_at: formatDate(r.updated_at),
+        image: createImagePath(r.image),
       };
     });
     return res.json(movies);
@@ -36,18 +33,15 @@ function show(req, res, next) {
   connection.query(filteredQuery, [id], (err, filteredResults) => {
     if (err) return next(err);
     const result = filteredResults[0];
-    const date = result.created_at;
-    const update = result.updateDate_at;
-    const formattedDate = DateTime.fromObject(date);
-    const formattedupdate = DateTime.fromObject(update);
+
     const reviewsQuery = `SELECT * FROM reviews WHERE movie_id = ? `;
 
     connection.query(reviewsQuery, [id], (err, reviewsResults) => {
       if (err) return next(err);
       const filteredMovie = {
         ...filteredResults[0],
-        created_at: formattedDate.toLocaleString(),
-        updated_at: formattedupdate.toLocaleString(),
+        created_at: formatDate(result.created_at),
+        updated_at: formatDate(result.updated_at),
         image: `${process.env.SERVER_URL}/images/${result.image}`,
         reviews: reviewsResults,
       };
