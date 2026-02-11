@@ -25,25 +25,39 @@ function index(req, res, next) {
 
 function show(req, res, next) {
   const id = req.params.id;
+
   const filteredQuery = `
-  SELECT * 
+  SELECT movies.*, CAST(AVG(reviews.vote) AS FLOAT) AS vote 
   FROM movies 
-  WHERE id = ? 
+  LEFT JOIN reviews
+  ON movies.id = reviews.movie_id
+  WHERE movies.id = ?
+  GROUP BY movies.id
 `;
   connection.query(filteredQuery, [id], (err, filteredResults) => {
     if (err) return next(err);
-    const result = filteredResults[0];
+
+    const movieResult = filteredResults[0];
 
     const reviewsQuery = `SELECT * FROM reviews WHERE movie_id = ? `;
 
     connection.query(reviewsQuery, [id], (err, reviewsResults) => {
       if (err) return next(err);
+
+      const reviewsFormatted = reviewsResults.map((review) => {
+        return {
+          ...review,
+          created_at: formatDate(review.created_at),
+          updated_at: formatDate(review.updated_at),
+        };
+      });
+
       const filteredMovie = {
         ...filteredResults[0],
-        created_at: formatDate(result.created_at),
-        updated_at: formatDate(result.updated_at),
-        image: `${process.env.SERVER_URL}/images/${result.image}`,
-        reviews: reviewsResults,
+        created_at: formatDate(movieResult.created_at),
+        updated_at: formatDate(movieResult.updated_at),
+        image: createImagePath(movieResult.image),
+        reviews: reviewsFormatted,
       };
       return res.json(filteredMovie);
     });
