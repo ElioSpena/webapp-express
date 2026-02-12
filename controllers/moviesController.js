@@ -87,7 +87,21 @@ function show(req, res, next) {
   });
 }
 
+//STORE REVIEWS
+
+function storeReviews(req, res, next) {
+  const { id } = req.params;
+  const { name, vote, text } = req.body;
+  const reviewQuery = `
+  INSERT INTO reviews (movie_id, name, vote, text) VALUES (?, ?, ?, ?)`;
+  connection.query(reviewQuery, [id, name, vote, text], (err, results) => {
+    if (err) return next(err);
+    console.log(results);
+  });
+}
+
 export default {
   index,
   show,
+  storeReviews,
 };
