@@ -7,7 +7,6 @@ const moviesRouter = express.Router();
 moviesRouter.get("/", moviesController.index);
 
 //SHOW
-moviesRouter.get("/:id", moviesController.show);
+moviesRouter.get("/:slug", moviesController.show);
 
 export default moviesRouter;
-

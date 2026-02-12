@@ -39,7 +39,7 @@ function index(req, res, next) {
 //SHOW
 
 function show(req, res, next) {
-  const slug = req.params.slug;
+  const { slug } = req.params;
 
   const filteredQuery = `
   SELECT movies.*, CAST(AVG(reviews.vote) AS FLOAT) AS vote 
@@ -64,7 +64,7 @@ function show(req, res, next) {
 
     const reviewsQuery = `SELECT * FROM reviews WHERE movie_id = ? `;
 
-    connection.query(reviewsQuery, [id], (err, reviewsResults) => {
+    connection.query(reviewsQuery, [movieResult.id], (err, reviewsResults) => {
       if (err) return next(err);
 
       const reviewsFormatted = reviewsResults.map((review) => {
