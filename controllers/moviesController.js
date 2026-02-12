@@ -5,8 +5,23 @@ import { formatDate, createImagePath } from "../functions/utility.js";
 //INDEX
 
 function index(req, res, next) {
-  const moviesQuery = `SELECT * FROM movies`;
-  connection.query(moviesQuery, (err, results) => {
+  const { search } = req.query;
+
+  let movieQuery = `
+  SELECT movies.*, CAST(AVG(reviews.vote) AS FLOAT) AS vote 
+  FROM movies 
+  LEFT JOIN reviews
+  ON movies.id = reviews.movie_id
+`;
+  let params = [];
+  if (search !== undefined) {
+    movieQuery += ` WHERE movies.title LIKE ? `;
+    params.push(`%${search}%`);
+  }
+
+  movieQuery += `GROUP BY movies.id`;
+
+  connection.query(movieQuery, params, (err, results) => {
     if (err) return next(err);
 
     const movies = results.map((r) => {
@@ -38,6 +53,14 @@ function show(req, res, next) {
     if (err) return next(err);
 
     const movieResult = filteredResults[0];
+
+    if (filteredResults.length === 0 || !movieResult.id) {
+      res.status(404);
+      return res.json({
+        error: "NOT FOUND",
+        message: "Il film non è stato trovato",
+      });
+    }
 
     const reviewsQuery = `SELECT * FROM reviews WHERE movie_id = ? `;
 
