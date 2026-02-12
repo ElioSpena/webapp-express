@@ -39,17 +39,17 @@ function index(req, res, next) {
 //SHOW
 
 function show(req, res, next) {
-  const id = req.params.id;
+  const slug = req.params.slug;
 
   const filteredQuery = `
   SELECT movies.*, CAST(AVG(reviews.vote) AS FLOAT) AS vote 
   FROM movies 
   LEFT JOIN reviews
   ON movies.id = reviews.movie_id
-  WHERE movies.id = ?
+  WHERE movies.slug = ?
   GROUP BY movies.id
 `;
-  connection.query(filteredQuery, [id], (err, filteredResults) => {
+  connection.query(filteredQuery, [slug], (err, filteredResults) => {
     if (err) return next(err);
 
     const movieResult = filteredResults[0];

@@ -10,3 +10,4 @@ moviesRouter.get("/", moviesController.index);
 moviesRouter.get("/:id", moviesController.show);
 
 export default moviesRouter;
+
