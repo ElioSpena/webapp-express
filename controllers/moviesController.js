@@ -11,15 +11,14 @@ function index(req, res, next) {
   SELECT movies.*, CAST(AVG(reviews.vote) AS FLOAT) AS vote 
   FROM movies 
   LEFT JOIN reviews
-  ON movies.id = reviews.movie_id
-`;
+  ON movies.id = reviews.movie_id  `;
   let params = [];
   if (search !== undefined) {
-    movieQuery += ` WHERE movies.title LIKE ? `;
+    movieQuery += ` WHERE movies.title LIKE ?  `;
     params.push(`%${search}%`);
   }
 
-  movieQuery += `GROUP BY movies.id`;
+  movieQuery += ` GROUP BY movies.id`;
 
   connection.query(movieQuery, params, (err, results) => {
     if (err) return next(err);
@@ -90,13 +89,22 @@ function show(req, res, next) {
 //STORE REVIEWS
 
 function storeReviews(req, res, next) {
+  console.log("funziona");
+
   const { id } = req.params;
   const { name, vote, text } = req.body;
   const reviewQuery = `
   INSERT INTO reviews (movie_id, name, vote, text) VALUES (?, ?, ?, ?)`;
+  console.log("funziona ancora");
+  console.log(req.body);
+
   connection.query(reviewQuery, [id, name, vote, text], (err, results) => {
     if (err) return next(err);
-    console.log(results);
+    console.log("funziona alla fine");
+
+    res.json({
+      message: "inviato",
+    });
   });
 }
 

@@ -9,4 +9,8 @@ moviesRouter.get("/", moviesController.index);
 //SHOW
 moviesRouter.get("/:slug", moviesController.show);
 
+//STORE REVIEWS
+moviesRouter.post("/:id/reviews", moviesController.storeReviews);
+
 export default moviesRouter;
+ 
