@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import connection from "../database/connectionDb.js";
 import { formatDate, createImagePath } from "../functions/utility.js";
 
@@ -123,14 +124,18 @@ function storeReviews(req, res, next) {
 //STORE MOVIES
 
 function storeMovies(req, res, next) {
-  const { title, director, genre, image, release_year, abstract } = req.body;
-  const slug = title.toLowerCase().trim().replace(" ", "-");
+  const imageName = req.file.filename || null;
+  const { title, director, genre, release_year, abstract } = req.body;
+  const slug = slugify(title, {
+    lower: true,
+    strict: true,
+  });
 
   const movieQuery = `INSERT INTO movies (title, director, genre, image, release_year, abstract, slug) VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
   connection.query(
     movieQuery,
-    [title, director, genre, image, release_year, abstract, slug],
+    [title, director, genre, imageName, release_year, abstract, slug],
     (err) => {
       if (err) return next(err);
 
