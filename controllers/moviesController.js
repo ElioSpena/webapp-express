@@ -1,5 +1,4 @@
 import connection from "../database/connectionDb.js";
-
 import { formatDate, createImagePath } from "../functions/utility.js";
 
 //INDEX
@@ -12,7 +11,9 @@ function index(req, res, next) {
   FROM movies 
   LEFT JOIN reviews
   ON movies.id = reviews.movie_id  `;
+
   let params = [];
+
   if (search !== undefined) {
     movieQuery += ` WHERE movies.title LIKE ?  `;
     params.push(`%${search}%`);
@@ -89,27 +90,61 @@ function show(req, res, next) {
 //STORE REVIEWS
 
 function storeReviews(req, res, next) {
-  console.log("funziona");
-
   const { id } = req.params;
   const { name, vote, text } = req.body;
+
+  if (
+    vote < 0 ||
+    vote > 5 ||
+    name.length < 2 ||
+    name.length > 20 ||
+    text.length < 10 ||
+    text.length > 500
+  ) {
+    res.status(400);
+    return res.json({
+      error: "BAD REQUEST",
+      message: "richiesta non valida",
+    });
+  }
+
   const reviewQuery = `
   INSERT INTO reviews (movie_id, name, vote, text) VALUES (?, ?, ?, ?)`;
-  console.log("funziona ancora");
-  console.log(req.body);
 
-  connection.query(reviewQuery, [id, name, vote, text], (err, results) => {
+  connection.query(reviewQuery, [id, name, vote, text], (err) => {
     if (err) return next(err);
-    console.log("funziona alla fine");
-
+    res.status(201);
     res.json({
-      message: "inviato",
+      message: "Recensione inviata",
     });
   });
+}
+
+//STORE MOVIES
+
+function storeMovies(req, res, next) {
+  const { title, director, genre, image, release_year, abstract } = req.body;
+  const slug = title.toLowerCase().trim().replace(" ", "-");
+
+  const movieQuery = `INSERT INTO movies (title, director, genre, image, release_year, abstract, slug) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+  connection.query(
+    movieQuery,
+    [title, director, genre, image, release_year, abstract, slug],
+    (err) => {
+      if (err) return next(err);
+
+      res.status(201);
+      return res.json({
+        message: "Film aggiunto!",
+      });
+    },
+  );
 }
 
 export default {
   index,
   show,
   storeReviews,
+  storeMovies,
 };
