@@ -1,5 +1,6 @@
 import express from "express";
 import moviesController from "../controllers/moviesController.js";
+import upload from "../middlewares/handleImageUpload.js";
 
 const moviesRouter = express.Router();
 
@@ -13,6 +14,6 @@ moviesRouter.get("/:slug", moviesController.show);
 moviesRouter.post("/:id/reviews", moviesController.storeReviews);
 
 //STORE MOVIES
-moviesRouter.post("/", moviesController.storeMovies);
+moviesRouter.post("/", upload.single("image"), moviesController.storeMovies);
 
 export default moviesRouter;
